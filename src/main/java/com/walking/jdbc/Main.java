@@ -13,6 +13,15 @@ import java.util.Collection;
  * Задача урока 129:
  * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/129/Statement.%20DDL.%20ResultSet.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
  * <p>
+ *
+ Создание таблицы passenger при старте приложения, если ее еще не существует.
+ Атрибутивный состав можно выбрать на основе класса Passenger в том же репозитории или
+ на основе практики к разделу SQL (уроки 79-112, разбор практики здесь);
+ Создайте метод удаления всех существующих пассажиров;
+ Создайте (или изучите предложенное в репозитории решение) метод для получения списка
+ всех существующих пассажиров;
+ Покройте получившуюся функциональность юнит-тестами, замокав взаимодействие с БД.
+
  * Задача урока 130:
  * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/130/PreparedStatement.%20SQL%20injection.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
  * <p>
@@ -23,11 +32,14 @@ import java.util.Collection;
  * <a href="https://github.com/KFalcon2022/lessons/blob/master/lessons/jdbc/132/JDBC.%20Tranastions.md#%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0">ссылка</a>
  */
 public class Main {
+    public static void main(String[] args){
+
+    }
     private final static Logger log = LogManager.getLogger(Main.class);
 
     private void createConnectionExample() {
         try (Connection connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/test_db",
+                "jdbc:postgresql://localhost:5432/practice",
                 "postgres",
                 "postgres")) {
             // Дальнейшая работа с БД через connection
