@@ -1,6 +1,7 @@
 package com.walking.jdbc.repository;
 
 import com.walking.jdbc.mapper.TicketMapper;
+import com.walking.jdbc.model.Passenger;
 import com.walking.jdbc.model.Ticket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -138,33 +139,70 @@ public class TicketRepository {
         }
     }
 
-    public void buyFirstTicket(Ticket ticket)throws SQLException{
-        String sqlPassenger="insert into passenger_new (id) values (?)";
-        String sqlTicket= """
+    public Ticket buyFirstTicket(Ticket ticket, Passenger passenger)throws SQLException{
+        String sqlInsertPassenger="""
+    insert into passenger_new (last_name, first_name, birth_date, male, last_purchase)
+     values (?, ?, ?, ?, ?)""";
+        String sqlGetPassenger= """
+                select id from passenger_new where last_name=? and first_name=? and birth_date=?""";
+        String sqlInsertTicket= """
                 insert into ticket_new (departure_airport, arrival_airport, departure_date,
                  arrival_date, purchase_date, passenger_id)
                  values(?, ?, ?, ?, ?, ?)""";
+        String sqlGetTicket= """
+                select * from ticket_new where departure_airport=? and arrival_airport=? and departure_date=? and
+                 arrival_date=? and purchase_date=? and passenger_id=?
+                """;
         try(Connection connection=dataSource.getConnection();
-        PreparedStatement passengerStatement=connection.prepareStatement(sqlPassenger);
-        PreparedStatement ticketStatement=connection.prepareStatement(sqlTicket)){
+        PreparedStatement insertPassengerStatement=connection.prepareStatement(sqlInsertPassenger);
+        PreparedStatement getPassengerStatement=connection.prepareStatement(sqlGetPassenger);
+        PreparedStatement ticketInsertStatement=connection.prepareStatement(sqlInsertTicket);
+        PreparedStatement getTicketStatement=connection.prepareStatement(sqlGetTicket)){
             connection.setAutoCommit(false);
-            passengerStatement.setLong(1,ticket.getPassenger_id());
-            ticketStatement.setString(1,ticket.getDeparture_airport());
-            ticketStatement.setString(2, ticket.getArrival_airport());
-            ticketStatement.setTimestamp(3, Timestamp.valueOf(ticket.getDeparture_date()));
-            ticketStatement.setTimestamp(4, Timestamp.valueOf(ticket.getArrival_date()));
-            ticketStatement.setTimestamp(5, Timestamp.valueOf(ticket.getPurchase_date()));
-            ticketStatement.setLong(6, ticket.getPassenger_id());
+            insertPassengerStatement.setString(1, passenger.getLastName());
+            insertPassengerStatement.setString(2, passenger.getFirstName());
+            insertPassengerStatement.setDate(3, Date.valueOf(passenger.getBirthDate()));
+            insertPassengerStatement.setBoolean(4, passenger.isMale());
+            insertPassengerStatement.setTimestamp(5, Timestamp.valueOf(passenger.getLastPurchase()));
+
+            getPassengerStatement.setString(1, passenger.getLastName());
+            getPassengerStatement.setString(2, passenger.getFirstName());
+            getPassengerStatement.setDate(3, Date.valueOf(passenger.getBirthDate()));
+
+
+            ticketInsertStatement.setString(1,ticket.getDeparture_airport());
+            ticketInsertStatement.setString(2, ticket.getArrival_airport());
+            ticketInsertStatement.setTimestamp(3, Timestamp.valueOf(ticket.getDeparture_date()));
+            ticketInsertStatement.setTimestamp(4, Timestamp.valueOf(ticket.getArrival_date()));
+            ticketInsertStatement.setTimestamp(5, Timestamp.valueOf(ticket.getPurchase_date()));
+
+            getTicketStatement.setString(1,ticket.getDeparture_airport());
+            getTicketStatement.setString(2, ticket.getArrival_airport());
+            getTicketStatement.setTimestamp(3, Timestamp.valueOf(ticket.getDeparture_date()));
+            getTicketStatement.setTimestamp(4, Timestamp.valueOf(ticket.getArrival_date()));
+            getTicketStatement.setTimestamp(5, Timestamp.valueOf(ticket.getPurchase_date()));
 
             try{
-                passengerStatement.executeUpdate();
-                ticketStatement.executeUpdate();
+                insertPassengerStatement.executeUpdate();
+                var rs=getPassengerStatement.executeQuery();
+                rs.next();
+                ticketInsertStatement.setLong(6, rs.getLong("id"));
+                getTicketStatement.setLong(6, rs.getLong("id"));
+                ticketInsertStatement.executeUpdate();
+                rs=getTicketStatement.executeQuery();
+                connection.commit();
+                var ticketList=mapper.map(rs);
+                if (!ticketList.isEmpty())
+                    ticket=ticketList.get(0);
+                else
+                    throw new RuntimeException("Билет не создан");
             } catch (Exception e){
                 connection.rollback();
                 log.error("Транзакция была откачена");
             }
         } catch (SQLException e){
-            log.error(e);
+            throw new RuntimeException(e);
         }
+        return ticket;
     }
 }
