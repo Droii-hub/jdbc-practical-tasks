@@ -2,10 +2,6 @@ package com.walking.jdbc.repository;
 
 import com.walking.jdbc.mapper.PassengerMapper;
 import com.walking.jdbc.model.Passenger;
-import com.walking.jdbc.repository.PassengerRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;

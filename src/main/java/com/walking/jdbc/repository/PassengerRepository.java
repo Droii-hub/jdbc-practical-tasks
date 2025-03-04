@@ -8,8 +8,6 @@ import org.apache.logging.log4j.Logger;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,32 +20,7 @@ public class PassengerRepository {
     public PassengerRepository(PassengerMapper mapper, DataSource dataSource) {
         this.mapper = mapper;
         this.dataSource=dataSource;
-        //if (tableIsEmpty()) fillTable();
     }
-
-//    private void fillTable(){
-//        String sql= """
-//                insert into passenger_new
-//                select * from passenger""";
-//        try (Connection connection=dataSource.getConnection();
-//             Statement statement=connection.createStatement()){
-//            statement.executeUpdate(sql);
-//        } catch (SQLException e){
-//            log.error(e);
-//        }
-//    }
-//
-//    private boolean tableIsEmpty(){
-//        String sql="select * from passenger_new";
-//        try (Connection connection=dataSource.getConnection();
-//        Statement statement=connection.createStatement()){
-//            ResultSet result=statement.executeQuery(sql);
-//            return !result.next();
-//        } catch (SQLException e){
-//            log.error(e);
-//            return false;
-//        }
-//    }
 
     public List<Passenger> getAll(){
         String sql="select * from passenger_new";
